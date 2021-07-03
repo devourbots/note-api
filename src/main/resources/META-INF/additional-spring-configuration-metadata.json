@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "sms.username",
+      "type": "java.lang.String",
+      "description": "Description for sms.username."
+  }
+] }

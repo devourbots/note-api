@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fun.lula.flomo.mapper.MemoMapper">
+    <select id="findMemoByTagName" resultMap="memoMap">
+        SELECT
+               memo.*,
+               memo_files.id as file_id, memo_files.memo_id, memo_files.name, memo_files.file_key, memo_files.file_size, memo_files.url
+        FROM
+             memo
+            <if test="tagName != ''">
+                LEFT JOIN memo_tags ON memo.id = memo_tags.memo_id
+                LEFT JOIN tags ON tags.id = memo_tags.tags_id
+            </if>
+                LEFT JOIN memo_files on memo.id = memo_files.memo_id
+        <where>
+            <if test="tagName != ''">
+                tags.tag = #{tagName}
+            </if>
+            AND memo.user_id = #{userId}
+        </where>
+        ORDER BY
+                memo.id DESC
+    </select>
+    <resultMap id="memoMap" type="fun.lula.flomo.model.entity.Memo">
+        <result property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="device" column="device"/>
+        <collection property="files" javaType="list" ofType="fun.lula.flomo.model.entity.MemoFiles">
+            <result property="id" column="file_id"/>
+            <result property="memoId" column="memo_id"/>
+            <result property="name" column="name"/>
+            <result property="fileKey" column="file_key"/>
+            <result property="fileSize" column="file_size"/>
+            <result property="url" column="url"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="getDailyCount" resultMap="memoCountMap">
+        SELECT
+            DATE (create_time) AS daily,
+            count(*) AS `count`
+        FROM
+            memo
+        WHERE
+            user_id = #{userId}
+        GROUP BY
+            DATE (create_time)
+            LIMIT 60;
+    </select>
+
+    <resultMap id="memoCountMap" type="java.util.Map">
+        <result column="daily" property="daily" javaType="String"/>
+        <result column="count" property="count" javaType="Integer"/>
+    </resultMap>
+</mapper>
