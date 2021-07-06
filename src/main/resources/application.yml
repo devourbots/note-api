@@ -3,6 +3,8 @@ server:
   servlet:
     context-path: /api/v1
 spring:
+  profiles:
+    active: docker
   sa-token:
     token-name: token
     timeout: 2592000

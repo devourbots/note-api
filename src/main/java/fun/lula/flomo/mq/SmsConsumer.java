@@ -19,6 +19,6 @@ public class SmsConsumer {
     @RabbitListener(queuesToDeclare = @Queue("sms_queue"))
     public void sendSms(SendSmsDto sendSmsDto) {
         log.info("MQ消费者 | 已经发送验证码");
-//        smsApi.send(sendSmsDto);
+        smsApi.send(sendSmsDto);
     }
 }

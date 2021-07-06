@@ -1,0 +1,59 @@
+version: "3"
+networks:
+  flomo:
+services:
+  flomo-redis:
+    container_name: flomo-redis
+    image: redis
+    networks:
+      flomo:
+    ports:
+    - "6379:6379"
+    restart: always
+  flomo-rabbitmq:
+    container_name: flomo-rabbitmq
+    image: rabbitmq:3-management
+    networks:
+      flomo:
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: root
+      RABBITMQ_DEFAULT_VHOST: /
+    restart: always
+  flomo-mysql:
+    container_name: flomo-mysql
+    image: mysql
+    networks:
+      flomo:
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: flomo_db
+      MYSQL_ROOT_HOST: "%"
+    command: [
+        '--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci'
+    ]
+    restart: always
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+  flomo-api:
+    container_name: flomo-api
+    restart: on-failure
+    networks:
+      flomo:
+    depends_on:
+      - flomo-mysql
+      - flomo-rabbitmq
+      - flomo-redis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MYSQLURL: jdbc:mysql://flomo-mysql:3306/flomo_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull
+    ports:
+      - "8989:8080"
