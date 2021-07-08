@@ -37,3 +37,4 @@ build/
 src/main/resources/application-dev.yml
 src/main/resources/application-pro.yml
 src/main/resources/application-docker.yml
+docker-compose.yml
